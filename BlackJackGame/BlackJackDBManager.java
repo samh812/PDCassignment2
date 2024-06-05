@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package BlackJackGame;
 
 /**
@@ -27,7 +23,7 @@ public class BlackJackDBManager {
 
     public BlackJackDBManager() {
         establishConnection();
-//        setupDatabase();
+        setupDatabase();
     }
 
     public Connection getConnection() {
@@ -46,16 +42,16 @@ public class BlackJackDBManager {
         }
     }
 
-    // Setup the database
-//    private void setupDatabase() {
-//        try (Statement stmt = conn.createStatement()) {
-//            stmt.executeUpdate("CREATE TABLE users (username VARCHAR(50) PRIMARY KEY, password VARCHAR(50))");
-//        } catch (SQLException ex) {
-//            if (!ex.getSQLState().equals("X0Y32")) {
-//                System.out.println(ex.getMessage());
-//            }
-//        }
-//    }
+
+    private void setupDatabase() {
+        try (Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate("CREATE TABLE users (username VARCHAR(50) PRIMARY KEY, password VARCHAR(50), balance DECIMAL(20, 2) DEFAULT 1000.00)");
+        } catch (SQLException ex) {
+            if (!ex.getSQLState().equals("X0Y32")) {
+                System.out.println(ex.getMessage());
+            }
+        }
+    }
 
     public boolean checkCredentials(String username, String password) {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM users WHERE username = ? AND password = ?")) {

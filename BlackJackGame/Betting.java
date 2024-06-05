@@ -56,8 +56,7 @@ public class Betting extends userLogin {
     public void payout(String userName, boolean won) {
         if (won) {
             int winnings = currentBet * 2;
-            int adjustment = winnings - currentBet; //Since the bet was already deducted, we add only the winnings minus the deducted bet.
-            userLogin.updateBalance(userName, userLogin.getBalance(userName) + adjustment);
+            userLogin.updateBalance(userName, userLogin.getBalance(userName) + winnings);
             System.out.println("You won!");
         } else {
 

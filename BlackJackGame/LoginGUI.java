@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package BlackJackGame;
 
 /**
@@ -10,6 +14,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 
 public class LoginGUI extends JFrame {
     private JTextField usernameField;
@@ -24,9 +29,13 @@ public class LoginGUI extends JFrame {
         dbManager = new BlackJackDBManager();
 
         setTitle("Login");
-        setSize(400, 200);
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new GridLayout(4, 2));
+        setLayout(new BorderLayout());
+
+        // Background panel
+        BackgroundPanel backgroundPanel = new BackgroundPanel("./resources/cards/table.jpg");
+        backgroundPanel.setLayout(new GridBagLayout());
 
         usernameField = new JTextField();
         passwordField = new JPasswordField();
@@ -34,13 +43,61 @@ public class LoginGUI extends JFrame {
         createAccountButton = new JButton("Create Account");
         messageLabel = new JLabel();
 
-        add(new JLabel("Username:"));
-        add(usernameField);
-        add(new JLabel("Password:"));
-        add(passwordField);
-        add(loginButton);
-        add(createAccountButton);
-        add(messageLabel);
+        // Change text color to white
+        JLabel usernameLabel = new JLabel("Username:");
+        JLabel passwordLabel = new JLabel("Password:");
+        usernameLabel.setForeground(Color.WHITE);
+        passwordLabel.setForeground(Color.WHITE);
+        usernameField.setForeground(Color.BLACK);
+        passwordField.setForeground(Color.BLACK);
+        loginButton.setForeground(Color.BLACK);
+        createAccountButton.setForeground(Color.BLACK);
+        messageLabel.setForeground(Color.WHITE);
+
+        // Set size for text fields and buttons
+        Dimension fieldSize = new Dimension(200, 30);
+        usernameLabel.setPreferredSize(new Dimension(120, 30));
+        passwordLabel.setPreferredSize(new Dimension(120, 30));
+        usernameField.setPreferredSize(fieldSize);
+        passwordField.setPreferredSize(fieldSize);
+        loginButton.setPreferredSize(new Dimension(120, 30)); // Size for buttons
+        createAccountButton.setPreferredSize(new Dimension(140, 30)); // Size for buttons
+
+        // Add components to background panel using GridBagLayout
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10); // Padding
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        backgroundPanel.add(usernameLabel, gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        backgroundPanel.add(usernameField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        backgroundPanel.add(passwordLabel, gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        backgroundPanel.add(passwordField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
+        backgroundPanel.add(loginButton, gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        backgroundPanel.add(createAccountButton, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
+        backgroundPanel.add(messageLabel, gbc);
+
+        add(backgroundPanel, BorderLayout.CENTER);
 
         loginButton.addActionListener(new ActionListener() {
             @Override
@@ -48,12 +105,20 @@ public class LoginGUI extends JFrame {
                 String username = usernameField.getText();
                 String password = new String(passwordField.getPassword());
 
-                if (dbManager.checkCredentials(username, password)) {
-                    messageLabel.setText("Login successful");
-                    new BlackJackGUI().setVisible(true);
-                    dispose();
+                if (username.isEmpty() || password.isEmpty()) {
+                    messageLabel.setForeground(Color.RED);
+                    messageLabel.setText("Username and password fields cannot be empty.");
                 } else {
-                    messageLabel.setText("Invalid credentials");
+                    if (dbManager.checkCredentials(username, password)) {
+                        messageLabel.setForeground(Color.WHITE);
+                        messageLabel.setText("Login successful");
+                        new BlackJackGUI().setVisible(true);
+                        dispose();
+                    } else {
+                        messageLabel.setForeground(Color.RED); // Set color to red for failure
+                        messageLabel.setText("Invalid credentials");
+                        passwordField.setText(""); // Clear password
+                    }
                 }
             }
         });
@@ -64,10 +129,19 @@ public class LoginGUI extends JFrame {
                 String username = usernameField.getText();
                 String password = new String(passwordField.getPassword());
 
-                if (dbManager.addUser(username, password)) {
-                    messageLabel.setText("Account created successfully");
+                if (username.isEmpty() || password.isEmpty()) {
+                    messageLabel.setForeground(Color.RED);
+                    messageLabel.setText("Username and password fields cannot be empty.");
                 } else {
-                    messageLabel.setText("Failed to create account");
+                    if (dbManager.addUser(username, password)) {
+                        messageLabel.setForeground(Color.WHITE);
+                        messageLabel.setText("Account created successfully! You can log in now.");
+                        usernameField.setText(""); // Clear username
+                        passwordField.setText(""); // Clear password
+                    } else {
+                        messageLabel.setForeground(Color.RED); // Set color to red for failure
+                        messageLabel.setText("Username already exists.");
+                    }
                 }
             }
         });
@@ -80,5 +154,26 @@ public class LoginGUI extends JFrame {
                 new LoginGUI().setVisible(true);
             }
         });
+    }
+
+    // Custom panel for background image
+    class BackgroundPanel extends JPanel {
+        private Image backgroundImage;
+
+        public BackgroundPanel(String imagePath) {
+            try {
+                backgroundImage = new ImageIcon(imagePath).getImage();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            if (backgroundImage != null) {
+                g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+            }
+        }
     }
 }

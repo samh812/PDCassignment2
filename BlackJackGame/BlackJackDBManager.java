@@ -42,17 +42,16 @@ public class BlackJackDBManager {
         }
     }
 
-
+    // Setup database tables
     private void setupDatabase() {
         try (Statement stmt = conn.createStatement()) {
-            stmt.executeUpdate("CREATE TABLE users (username VARCHAR(50) PRIMARY KEY, password VARCHAR(50), balance DECIMAL(20, 2) DEFAULT 1000.00)");
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS users (username VARCHAR(50) PRIMARY KEY, password VARCHAR(50), balance DECIMAL(20, 2) DEFAULT 1000.00)");
         } catch (SQLException ex) {
-            if (!ex.getSQLState().equals("X0Y32")) {
-                System.out.println(ex.getMessage());
-            }
+            System.out.println(ex.getMessage());
         }
     }
 
+    // Check user credentials
     public boolean checkCredentials(String username, String password) {
         try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM users WHERE username = ? AND password = ?")) {
             stmt.setString(1, username);
@@ -65,22 +64,26 @@ public class BlackJackDBManager {
         }
     }
 
+    // Add a new user
     public boolean addUser(String username, String password) {
-        try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO users (username, password) VALUES (?, ?)")) {
-            stmt.setString(1, username);
-            stmt.setString(2, password);
-            int rowsAffected = stmt.executeUpdate();
+        try {
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO users (username, password) VALUES (?, ?)");
+            insertStmt.setString(1, username);
+            insertStmt.setString(2, password);
+            int rowsAffected = insertStmt.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            // Failed to insert due to primary key violation
             return false;
         }
     }
 
+    // Close database connection
     public void closeConnections() {
         if (conn != null) {
             try {
                 conn.close();
+                System.out.println("Connection closed successfully");
             } catch (SQLException ex) {
                 System.out.println(ex.getMessage());
             }

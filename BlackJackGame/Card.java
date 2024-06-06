@@ -1,36 +1,70 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package BlackJackGame;
 
-public class Card {
-    public enum Suit {
-        HEARTS, DIAMONDS, CLUBS, SPADES
+public class Card 
+{
+    public enum CardValue 
+    {
+        TWO(2),
+        THREE(3), 
+        FOUR(4), 
+        FIVE(5), 
+        SIX(6), 
+        SEVEN(7), 
+        EIGHT(8), 
+        NINE(9), 
+        TEN(10), 
+        JACK(10), 
+        QUEEN(10), 
+        KING(10), 
+        ACE(11);
+
+        private final int value;
+
+        CardValue(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public static CardValue fromIndex(int index) 
+        {
+            if (index >= 0 && index <= 3) return TWO;
+            if (index >= 4 && index <= 7) return THREE;
+            if (index >= 8 && index <= 11) return FOUR;
+            if (index >= 12 && index <= 15) return FIVE;
+            if (index >= 16 && index <= 19) return SIX;
+            if (index >= 20 && index <= 23) return SEVEN;
+            if (index >= 24 && index <= 27) return EIGHT;
+            if (index >= 28 && index <= 31) return NINE;
+            if (index >= 32 && index <= 35) return TEN;
+            if (index >= 36 && index <= 39) return JACK;
+            if (index >= 40 && index <= 43) return QUEEN;
+            if (index >= 44 && index <= 47) return KING;
+            if (index >= 48 && index <= 51) return ACE;
+            throw new IllegalArgumentException("Invalid card index: " + index);
+        }
     }
 
-    public enum Rank {
-        TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING, ACE
+    private final int index; // The index of the card in the deck (0-51)
+    private final CardValue value; // The value of the card
+
+    public Card(int index) {
+        this.index = index;
+        this.value = CardValue.fromIndex(index);
     }
 
-    private final Suit suit;
-    private final Rank rank;
-
-    public Card(Suit suit, Rank rank) {
-        this.suit = suit;
-        this.rank = rank;
+    public int getIndex() {
+        return index;
     }
 
-    public Suit getSuit() {
-        return suit;
-    }
-
-    public Rank getRank() {
-        return rank;
+    public int getValue() {
+        return value.getValue();
     }
 
     @Override
     public String toString() {
-        return rank + " of " + suit;
+        return "Card #" + index + " with value " + value.getValue();
     }
 }

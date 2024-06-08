@@ -21,7 +21,7 @@ public class BlackJackGame {
         // Deal two cards to the player and the dealer at the start of the game
         playerHand.add(deck.draw());
         playerHand.add(deck.draw());
-        dealerHand.add(deck.draw());
+       // dealerHand.add(deck.draw());
         dealerHand.add(deck.draw());
     }
 

@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package BlackJackGame;
 
 /**
@@ -15,6 +11,7 @@ import java.awt.event.ActionListener;
 
 public class WelcomeGUI extends JFrame {
     private JLabel greetingLabel;
+    private JLabel rulesLabel;
     private JButton loginButton;
     private JButton quitButton;
 
@@ -43,11 +40,26 @@ public class WelcomeGUI extends JFrame {
         gbc.anchor = GridBagConstraints.CENTER;
         backgroundPanel.add(greetingLabel, gbc);
 
+        // Rules label
+        rulesLabel = new JLabel("<html>Press the login button to log in to your account<br>" +
+                                "You can press the quit button at any time to quit the game <br>"+
+                                "Once you have logged in, you must place a bet for the game to start<br>"+
+                                "Have fun!</html>");
+        rulesLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+        rulesLabel.setForeground(Color.WHITE);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        backgroundPanel.add(rulesLabel, gbc);
+
         // Login button
         loginButton = new JButton("Login");
         loginButton.setFont(new Font("Arial", Font.PLAIN, 18));
+        Dimension buttonSize = new Dimension(220, 40);
+        loginButton.setPreferredSize(buttonSize);
         gbc.gridx = 0;
-        gbc.gridy = 1;
+        gbc.gridy = 2;
         gbc.gridwidth = 1;
         gbc.anchor = GridBagConstraints.CENTER;
         backgroundPanel.add(loginButton, gbc);
@@ -55,8 +67,9 @@ public class WelcomeGUI extends JFrame {
         // Quit button
         quitButton = new JButton("Quit");
         quitButton.setFont(new Font("Arial", Font.PLAIN, 18));
+        quitButton.setPreferredSize(buttonSize);
         gbc.gridx = 1;
-        gbc.gridy = 1;
+        gbc.gridy = 2;
         gbc.gridwidth = 1;
         gbc.anchor = GridBagConstraints.CENTER;
         backgroundPanel.add(quitButton, gbc);

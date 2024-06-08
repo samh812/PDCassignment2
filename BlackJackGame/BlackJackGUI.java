@@ -151,7 +151,7 @@ public class BlackJackGUI extends JFrame {
             }
         });
         
-              placeBetButton.addActionListener(new ActionListener() {
+              placeBetButton.addActionListener(new ActionListener() { //p Place bet button
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
@@ -165,7 +165,7 @@ public class BlackJackGUI extends JFrame {
                         balanceLabel.setText("Balance: $" + dbManager.getUserBalance(username));
                     }
 
-                    if (betAmount <= balance && betAmount >= 0)
+                    if (betAmount <= balance && betAmount >= 0) // If the bet amount is greater than or equal to 0, and bet amount less than or equal to balance
                     {
                         currentBet = new Betting(username, betAmount);
                         dbManager.placeBet(currentBet);
@@ -199,7 +199,7 @@ public class BlackJackGUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 hitButton.setEnabled(false);
                 standButton.setEnabled(false);
-                dealerTurn();
+                dealerTurn(); // Trigger dealer turn
             }
         });
 
@@ -207,7 +207,7 @@ public class BlackJackGUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 game.newGame();
-                playerCardPanel.removeAll();
+                playerCardPanel.removeAll(); // Clear the screen
                 dealerCardPanel.removeAll();
                 playerCardPanel.revalidate();
                 playerCardPanel.repaint();
@@ -215,15 +215,15 @@ public class BlackJackGUI extends JFrame {
                 dealerCardPanel.repaint();
                 hitButton.setEnabled(false); // Disable hit button for new game
                 standButton.setEnabled(false); // Disable stand button for new game
-                placeBetButton.setEnabled(true);
-                betAmountField.setEnabled(true);
+                placeBetButton.setEnabled(true); // Enable place bet button for new game
+                betAmountField.setEnabled(true); // Enable bet amount box for new game
                 
                 balance = dbManager.getUserBalance(username);
                
                 playerScoreLabel.setText("Player Score: 0");
                 dealerScoreLabel.setText("Dealer Score: 0");
                        
-                if (balance == 0)
+                if (balance == 0) // Only update the text label to 100 if balance reaches 0, this is a visual change 
                 {
                     balanceLabel.setText("Balance: $100.0");
                 }
@@ -247,7 +247,7 @@ public class BlackJackGUI extends JFrame {
             }
         });
     }
-
+    // Deal the cards at the very start of the game
     private void displayInitialCards() {
         List<Card> playerHand = game.getPlayerHand();
         List<Card> dealerHand = game.getDealerHand();
@@ -259,7 +259,7 @@ public class BlackJackGUI extends JFrame {
             displayFaceDownCard();
         }
     }
-
+// Displays Current player cards to the screen
     private void displayPlayerCard(int cardValue) {
         String imagePath = "./resources/cards/" + cardValue + ".png";
         ImageIcon cardIcon = new ImageIcon(imagePath);
@@ -272,7 +272,7 @@ public class BlackJackGUI extends JFrame {
         playerCardPanel.revalidate();
         playerCardPanel.repaint();
     }
-
+// Displays dealer cards to the screen
     private void displayDealerCard(int cardValue) {
         String imagePath = "./resources/cards/" + cardValue + ".png";
         ImageIcon cardIcon = new ImageIcon(imagePath);
@@ -285,7 +285,7 @@ public class BlackJackGUI extends JFrame {
         dealerCardPanel.revalidate();
         dealerCardPanel.repaint();
     }
-
+// Displays facedown card to the screen
     private void displayFaceDownCard() {
         String imagePath = "./resources/cards/cardback.png";
         ImageIcon cardIcon = new ImageIcon(imagePath);
@@ -298,7 +298,7 @@ public class BlackJackGUI extends JFrame {
         dealerCardPanel.revalidate();
         dealerCardPanel.repaint();
     }
-
+// Dealer turn
     private void dealerTurn() {
         game.revealDealerCard();
         displayDealerCards();
@@ -309,7 +309,7 @@ public class BlackJackGUI extends JFrame {
         }
 
         String resultMessage;
-
+// Logic for handeling if player or dealer wins
         if (game.getPlayerScore() > 21) {
             resultMessage = "You went over 21!";
         } else if (game.getPlayerScore() == game.getDealerScore()) {
@@ -321,7 +321,7 @@ public class BlackJackGUI extends JFrame {
             resultMessage = "Dealer went over 21! You win!";
             updateBalance(true); // Player wins
         } else if (game.getDealerScore() > game.getPlayerScore()) {
-            resultMessage = "Dealer wins!";
+            resultMessage = "Dealer wins!"; // Dealer Wins
         } else if (game.getPlayerScore() == 21) {
             resultMessage = "BlackJack!";
             updateBalance(true);
@@ -341,7 +341,7 @@ public class BlackJackGUI extends JFrame {
             displayDealerCard(dealerHand.get(i).getIndex());
         }
     }
-
+// Update the user balance
     private void updateBalance(boolean playerWins) {
         double betAmount = currentBet.getBetAmount();
         double winnings = playerWins ? betAmount * 2 : betAmount;
@@ -351,7 +351,8 @@ public class BlackJackGUI extends JFrame {
             JOptionPane.showMessageDialog(null, "Error updating balance: " + e.getMessage());
         }
     }
-    
+
+    // Method for if there is a tie so the balance is correctly updated to go back to before bet was placed
     private void tie(boolean tieGame) {
         double betAmount = currentBet.getBetAmount();
         double winnings = tieGame ? betAmount : betAmount;
@@ -362,6 +363,7 @@ public class BlackJackGUI extends JFrame {
         }
     }
 
+    // Update the scores to the screen
     private void updateScores() {
         int playerScore = game.getPlayerScore();
         int dealerScore = game.getDealerScore();

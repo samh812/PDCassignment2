@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class BlackJackDBManager {
+
     private static final String URL = "jdbc:derby:BlackJackDB;create=true";
     private static final String USER_NAME = "pdc"; // your DB username
     private static final String PASSWORD = "pdc"; // your DB password
@@ -37,7 +38,7 @@ public class BlackJackDBManager {
 
     // Setup database tables
     private void setupDatabase() {
-        try (Statement stmt = conn.createStatement()) {
+        try ( Statement stmt = conn.createStatement()) {
             // Check if table exists
             ResultSet rs = conn.getMetaData().getTables(null, null, "USERS", null);
             if (!rs.next()) {
@@ -51,7 +52,7 @@ public class BlackJackDBManager {
 
     // Check user credentials
     public boolean checkCredentials(String username, String password) {
-        try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM users WHERE username = ? AND password = ?")) {
+        try ( PreparedStatement stmt = conn.prepareStatement("SELECT * FROM users WHERE username = ? AND password = ?")) {
             stmt.setString(1, username);
             stmt.setString(2, password);
             ResultSet rs = stmt.executeQuery();
@@ -90,7 +91,7 @@ public class BlackJackDBManager {
 
     public double getUserBalance(String username) {
         double balance = 0.0;
-        try (PreparedStatement stmt = getConnection().prepareStatement("SELECT balance FROM users WHERE username = ?")) {
+        try ( PreparedStatement stmt = getConnection().prepareStatement("SELECT balance FROM users WHERE username = ?")) {
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -103,7 +104,7 @@ public class BlackJackDBManager {
     }
 
     public void placeBet(Betting bet) throws SQLException {
-        try (PreparedStatement stmt = getConnection().prepareStatement("UPDATE users SET balance = balance - ? WHERE username = ? AND balance >= ?")) {
+        try ( PreparedStatement stmt = getConnection().prepareStatement("UPDATE users SET balance = balance - ? WHERE username = ? AND balance >= ?")) {
             stmt.setDouble(1, bet.getBetAmount());
             stmt.setString(2, bet.getUsername());
             stmt.setDouble(3, bet.getBetAmount());
@@ -115,9 +116,16 @@ public class BlackJackDBManager {
     }
 
     public void updateUserBalance(String username, double amount) throws SQLException {
-        try (PreparedStatement stmt = getConnection().prepareStatement("UPDATE users SET balance = balance + ? WHERE username = ?")) {
+        try ( PreparedStatement stmt = getConnection().prepareStatement("UPDATE users SET balance = balance + ? WHERE username = ?")) {
             stmt.setDouble(1, amount);
             stmt.setString(2, username);
+            stmt.executeUpdate();
+        }
+    }
+
+    public void deleteUser(String username) throws SQLException {
+        try ( PreparedStatement stmt = getConnection().prepareStatement("DELETE FROM users WHERE username = ?")) {
+            stmt.setString(1, username);
             stmt.executeUpdate();
         }
     }

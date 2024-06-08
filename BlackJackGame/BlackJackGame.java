@@ -18,10 +18,9 @@ public class BlackJackGame {
         playerHand = new ArrayList<>();
         dealerHand = new ArrayList<>();
         dealerCardRevealed = false;
-        // Deal two cards to the player and the dealer at the start of the game
+        // Deal two cards to the player one to dealer at the start of the game
         playerHand.add(deck.draw());
         playerHand.add(deck.draw());
-       // dealerHand.add(deck.draw());
         dealerHand.add(deck.draw());
     }
 
@@ -45,6 +44,7 @@ public class BlackJackGame {
         }
     }
 
+    // logic for determining if player or dealer has busted, if the deck is empty ect
     public void revealDealerCard() {
         dealerCardRevealed = true;
     }
@@ -81,6 +81,7 @@ public class BlackJackGame {
         return dealerHand;
     }
 
+    // Calculate the score
     private int calculateScore(List<Card> hand) {
         int score = 0;
         int aces = 0;

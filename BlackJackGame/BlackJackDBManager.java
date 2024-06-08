@@ -1,12 +1,5 @@
 package BlackJackGame;
 
-/**
- *
- * @author samh
- */
-
-
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -45,7 +38,12 @@ public class BlackJackDBManager {
     // Setup database tables
     private void setupDatabase() {
         try (Statement stmt = conn.createStatement()) {
-            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS users (username VARCHAR(50) PRIMARY KEY, password VARCHAR(50), balance DECIMAL(20, 2) DEFAULT 1000.00)");
+            // Check if table exists
+            ResultSet rs = conn.getMetaData().getTables(null, null, "USERS", null);
+            if (!rs.next()) {
+                // Table does not exist, create it
+                stmt.executeUpdate("CREATE TABLE users (username VARCHAR(50) PRIMARY KEY, password VARCHAR(50), balance DECIMAL(20, 2) DEFAULT 1000.00)");
+            }
         } catch (SQLException ex) {
             System.out.println(ex.getMessage());
         }
@@ -87,6 +85,40 @@ public class BlackJackDBManager {
             } catch (SQLException ex) {
                 System.out.println(ex.getMessage());
             }
+        }
+    }
+
+    public double getUserBalance(String username) {
+        double balance = 0.0;
+        try (PreparedStatement stmt = getConnection().prepareStatement("SELECT balance FROM users WHERE username = ?")) {
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                balance = rs.getDouble("balance");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return balance;
+    }
+
+    public void placeBet(Betting bet) throws SQLException {
+        try (PreparedStatement stmt = getConnection().prepareStatement("UPDATE users SET balance = balance - ? WHERE username = ? AND balance >= ?")) {
+            stmt.setDouble(1, bet.getBetAmount());
+            stmt.setString(2, bet.getUsername());
+            stmt.setDouble(3, bet.getBetAmount());
+            int rowsUpdated = stmt.executeUpdate();
+            if (rowsUpdated == 0) {
+                throw new SQLException("Insufficient balance or user not found.");
+            }
+        }
+    }
+
+    public void updateUserBalance(String username, double amount) throws SQLException {
+        try (PreparedStatement stmt = getConnection().prepareStatement("UPDATE users SET balance = balance + ? WHERE username = ?")) {
+            stmt.setDouble(1, amount);
+            stmt.setString(2, username);
+            stmt.executeUpdate();
         }
     }
 }

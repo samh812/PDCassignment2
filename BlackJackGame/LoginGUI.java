@@ -11,6 +11,7 @@ public class LoginGUI extends JFrame {
     private JPasswordField passwordField;
     private JButton loginButton;
     private JButton createAccountButton;
+    private JButton quitButton;
     private JLabel messageLabel;
 
     private BlackJackDBManager dbManager;
@@ -31,6 +32,7 @@ public class LoginGUI extends JFrame {
         passwordField = new JPasswordField();
         loginButton = new JButton("Login");
         createAccountButton = new JButton("Create Account");
+        quitButton = new JButton("Quit");
         messageLabel = new JLabel();
 
         // Change text color to white
@@ -42,6 +44,7 @@ public class LoginGUI extends JFrame {
         passwordField.setForeground(Color.BLACK);
         loginButton.setForeground(Color.BLACK);
         createAccountButton.setForeground(Color.BLACK);
+        quitButton.setForeground(Color.BLACK);
         messageLabel.setForeground(Color.WHITE);
 
         // Set size for text fields and buttons
@@ -52,6 +55,7 @@ public class LoginGUI extends JFrame {
         passwordField.setPreferredSize(fieldSize);
         loginButton.setPreferredSize(new Dimension(120, 30)); // Size for buttons
         createAccountButton.setPreferredSize(new Dimension(140, 30)); // Size for buttons
+        quitButton.setPreferredSize(new Dimension(120, 30)); // Size for buttons
 
         // Add components to background panel using GridBagLayout
         GridBagConstraints gbc = new GridBagConstraints();
@@ -73,14 +77,19 @@ public class LoginGUI extends JFrame {
         gbc.gridy = 1;
         backgroundPanel.add(passwordField, gbc);
 
+        // Panel for buttons
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setOpaque(false); // Make button panel transparent
+        buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 0)); // Center align buttons with some horizontal gap
+
+        buttonPanel.add(loginButton);
+        buttonPanel.add(createAccountButton);
+        buttonPanel.add(quitButton);
+
         gbc.gridx = 0;
         gbc.gridy = 2;
-        gbc.gridwidth = 1;
-        backgroundPanel.add(loginButton, gbc);
-
-        gbc.gridx = 1;
-        gbc.gridy = 2;
-        backgroundPanel.add(createAccountButton, gbc);
+        gbc.gridwidth = 2;
+        backgroundPanel.add(buttonPanel, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 3;
@@ -89,7 +98,7 @@ public class LoginGUI extends JFrame {
 
         add(backgroundPanel, BorderLayout.CENTER);
 
- loginButton.addActionListener(new ActionListener() {
+        loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String username = usernameField.getText();
@@ -97,7 +106,7 @@ public class LoginGUI extends JFrame {
 
                 if (dbManager.checkCredentials(username, password)) {
                     dispose();
-                    new BlackJackGUI(username).setVisible(true);
+                     new BlackJackGUI(username).setVisible(true);
                 } else {
                     JOptionPane.showMessageDialog(null, "Invalid login credentials");
                 }
@@ -124,6 +133,13 @@ public class LoginGUI extends JFrame {
                         messageLabel.setText("Username already exists.");
                     }
                 }
+            }
+        });
+
+        quitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0); // Exit the application
             }
         });
     }

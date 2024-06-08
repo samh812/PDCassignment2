@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
 import java.util.List;
 
 public class BlackJackGUI extends JFrame {
@@ -19,8 +20,22 @@ public class BlackJackGUI extends JFrame {
     private JLabel dealerScoreLabel;
     private BlackJackGame game;
     private JLabel dealerFaceDownCardLabel;
+    private JLabel balanceLabel;
+    private JTextField betAmountField;
+    private JButton placeBetButton;
+    private BlackJackDBManager dbManager;
+    private String username;
+    private Betting currentBet;
+    private JButton quitButton;
+    private JButton logoutButton;
 
-    public BlackJackGUI() {
+    public BlackJackGUI(String username) {
+        // Set the username
+        this.username = username;
+
+        // Initialize dbManager
+        dbManager = new BlackJackDBManager();
+
         game = new BlackJackGame();
 
         setTitle("BlackJack Game");
@@ -34,17 +49,38 @@ public class BlackJackGUI extends JFrame {
         GridBagConstraints gbc = new GridBagConstraints();
 
         // Create components
+        balanceLabel = new JLabel("Balance: $" + dbManager.getUserBalance(username));
+
+        // Add betting components
+        betAmountField = new JTextField(10);
+        placeBetButton = new JButton("Place Bet");
+        quitButton = new JButton("Quit");
+        logoutButton = new JButton("Logout");
+
+        JPanel bettingPanel = new JPanel();
+        bettingPanel.add(new JLabel("Bet Amount:"));
+        bettingPanel.add(betAmountField);
+        bettingPanel.add(placeBetButton);
+        bettingPanel.add(quitButton);
+        bettingPanel.add(logoutButton);
+        
         hitButton = new JButton("Hit");
+        hitButton.setEnabled(false);
         standButton = new JButton("Stand");
+        standButton.setEnabled(false);
         newGameButton = new JButton("New Game");
+
         playerCardPanel = new JPanel();
         playerCardPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10)); // Use FlowLayout for arranging cards horizontally
         playerCardPanel.setOpaque(false); // Make playerCardPanel transparent
+
         dealerCardPanel = new JPanel();
         dealerCardPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10)); // Use FlowLayout for arranging cards horizontally
         dealerCardPanel.setOpaque(false); // Make dealerCardPanel transparent
+
         playerScoreLabel = new JLabel("Player Score: 0");
         playerScoreLabel.setForeground(Color.WHITE);
+
         dealerScoreLabel = new JLabel("Dealer Score: 0");
         dealerScoreLabel.setForeground(Color.WHITE);
 
@@ -89,6 +125,11 @@ public class BlackJackGUI extends JFrame {
 
         // Add background panel to the frame
         add(backgroundPanel, BorderLayout.CENTER);
+        
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.add(balanceLabel, BorderLayout.NORTH);
+        topPanel.add(bettingPanel, BorderLayout.SOUTH);
+        add(topPanel, BorderLayout.NORTH);
 
         // Add action listeners
         hitButton.addActionListener(new ActionListener() {
@@ -105,6 +146,42 @@ public class BlackJackGUI extends JFrame {
                         standButton.setEnabled(false); // Disable stand button
                         dealerTurn();
                     }
+                }
+            }
+        });
+        
+              placeBetButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    double betAmount = Double.parseDouble(betAmountField.getText());
+                    double balance = dbManager.getUserBalance(username);
+
+                    // Reset balance to $100 if it is 0
+                    if (balance == 0) {
+                        dbManager.updateUserBalance(username, 100);
+                        balance = 100;
+                    }
+
+                    if (betAmount <= balance)
+                    {
+                        currentBet = new Betting(username, betAmount);
+                        dbManager.placeBet(currentBet);
+                        JOptionPane.showMessageDialog(null, "Bet placed successfully!");
+                        balanceLabel.setText("Balance: $" + dbManager.getUserBalance(username));
+                        placeBetButton.setEnabled(false);
+                        betAmountField.setEnabled(false);
+                        hitButton.setEnabled(true);
+                        standButton.setEnabled(true);
+                        displayInitialCards();
+                        updateScores();
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Insufficient balance.");
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(null, "Invalid bet amount. Please enter a valid number.");
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(null, "Error placing bet: " + ex.getMessage());
                 }
             }
         });
@@ -128,67 +205,30 @@ public class BlackJackGUI extends JFrame {
                 playerCardPanel.repaint();
                 dealerCardPanel.revalidate();
                 dealerCardPanel.repaint();
-                displayInitialCards();
-                updateScores();
-                hitButton.setEnabled(true); // Enable hit button for new game
-                standButton.setEnabled(true); // Enable stand button for new game
+                hitButton.setEnabled(false); // Disable hit button for new game
+                standButton.setEnabled(false); // Disable stand button for new game
+                placeBetButton.setEnabled(true);
+                betAmountField.setEnabled(true);
+                playerScoreLabel.setText("Player Score: 0");
+                dealerScoreLabel.setText("Dealer Score: 0");
             }
         });
-
-        // Display initial cards at the start
-        displayInitialCards();
-        updateScores();
-    }
-
-    private void displayPlayerCard(int cardValue) {
-        String imagePath = "./resources/cards/" + cardValue + ".png"; // Update with your image path
-        ImageIcon cardIcon = new ImageIcon(imagePath);
-        Image image = cardIcon.getImage(); // Transform it
-        Image scaledImage = image.getScaledInstance(100, 150, java.awt.Image.SCALE_SMOOTH); // Scale it to desired size
-        cardIcon = new ImageIcon(scaledImage);  // Transform it back
-
-        JLabel cardLabel = new JLabel(cardIcon); // Create a new JLabel for the card
-        playerCardPanel.add(cardLabel); // Add the new card to the panel
-        playerCardPanel.revalidate(); // Refresh the panel to display the new card
-        playerCardPanel.repaint();
-    }
-
-    private void displayDealerCard(int cardValue) {
-        String imagePath = "./resources/cards/" + cardValue + ".png"; // Update with your image path
-        ImageIcon cardIcon = new ImageIcon(imagePath);
-        Image image = cardIcon.getImage(); // Transform it
-        Image scaledImage = image.getScaledInstance(100, 150, java.awt.Image.SCALE_SMOOTH); // Scale it to desired size
-        cardIcon = new ImageIcon(scaledImage);  // Transform it back
-
-        JLabel cardLabel = new JLabel(cardIcon); // Create a new JLabel for the card
-        dealerCardPanel.add(cardLabel); // Add the new card to the panel
-        dealerCardPanel.revalidate(); // Refresh the panel to display the new card
-        dealerCardPanel.repaint();
-    }
-
-    private void displayDealerCards() {
-        dealerCardPanel.removeAll();
-        List<Card> dealerHand = game.getDealerHand();
-        for (int i = 0; i < dealerHand.size(); i++) {
-            if (i == 1 && !game.isDealerCardRevealed()) {
-                displayFaceDownCard();
-            } else {
-                displayDealerCard(dealerHand.get(i).getIndex());
+        
+        // Quit button action listener
+        quitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0); // close the application
             }
-        }
-    }
-
-    private void displayFaceDownCard() {
-        String imagePath = "./resources/cards/facedown.jpg"; // Update with your face-down card image path
-        ImageIcon cardIcon = new ImageIcon(imagePath);
-        Image image = cardIcon.getImage(); // Transform it
-        Image scaledImage = image.getScaledInstance(100, 150, java.awt.Image.SCALE_SMOOTH); // Scale it to desired size
-        cardIcon = new ImageIcon(scaledImage);  // Transform it back
-
-        dealerFaceDownCardLabel = new JLabel(cardIcon); // Create a new JLabel for the face-down card
-        dealerCardPanel.add(dealerFaceDownCardLabel); // Add the face-down card to the panel
-        dealerCardPanel.revalidate(); // Refresh the panel to display the new card
-        dealerCardPanel.repaint();
+        });
+        
+        logoutButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+                new LoginGUI().setVisible(true);
+            }
+        });
     }
 
     private void displayInitialCards() {
@@ -197,13 +237,49 @@ public class BlackJackGUI extends JFrame {
         for (Card card : playerHand) {
             displayPlayerCard(card.getIndex());
         }
-        for (int i = 0; i < dealerHand.size(); i++) {
-            if (i == 1) {
-                displayFaceDownCard();
-            } else {
-                displayDealerCard(dealerHand.get(i).getIndex());
-            }
+        if (!dealerHand.isEmpty()) {
+            displayDealerCard(dealerHand.get(0).getIndex());
+            displayFaceDownCard();
         }
+    }
+
+    private void displayPlayerCard(int cardValue) {
+        String imagePath = "./resources/cards/" + cardValue + ".png";
+        ImageIcon cardIcon = new ImageIcon(imagePath);
+        Image image = cardIcon.getImage();
+        Image scaledImage = image.getScaledInstance(100, 150, java.awt.Image.SCALE_SMOOTH);
+        cardIcon = new ImageIcon(scaledImage);
+
+        JLabel cardLabel = new JLabel(cardIcon);
+        playerCardPanel.add(cardLabel);
+        playerCardPanel.revalidate();
+        playerCardPanel.repaint();
+    }
+
+    private void displayDealerCard(int cardValue) {
+        String imagePath = "./resources/cards/" + cardValue + ".png";
+        ImageIcon cardIcon = new ImageIcon(imagePath);
+        Image image = cardIcon.getImage();
+        Image scaledImage = image.getScaledInstance(100, 150, java.awt.Image.SCALE_SMOOTH);
+        cardIcon = new ImageIcon(scaledImage);
+
+        JLabel cardLabel = new JLabel(cardIcon);
+        dealerCardPanel.add(cardLabel);
+        dealerCardPanel.revalidate();
+        dealerCardPanel.repaint();
+    }
+
+    private void displayFaceDownCard() {
+        String imagePath = "./resources/cards/cardback.png";
+        ImageIcon cardIcon = new ImageIcon(imagePath);
+        Image image = cardIcon.getImage();
+        Image scaledImage = image.getScaledInstance(100, 150, java.awt.Image.SCALE_SMOOTH);
+        cardIcon = new ImageIcon(scaledImage);
+
+        dealerFaceDownCardLabel = new JLabel(cardIcon);
+        dealerCardPanel.add(dealerFaceDownCardLabel);
+        dealerCardPanel.revalidate();
+        dealerCardPanel.repaint();
     }
 
     private void dealerTurn() {
@@ -218,18 +294,55 @@ public class BlackJackGUI extends JFrame {
         String resultMessage;
 
         if (game.getPlayerScore() > 21) {
-            resultMessage = "You went over 21! Dealer wins!";
+            resultMessage = "You went over 21!";
+        } else if (game.getPlayerScore() == game.getDealerScore()) {
+            resultMessage = "Tie!";
+            tie(true);
+        } else if (game.getDealerScore() == 21) {
+            resultMessage = "Dealer Has 21!";
         } else if (game.hasDealerBusted()) {
             resultMessage = "Dealer went over 21! You win!";
+            updateBalance(true); // Player wins
         } else if (game.getDealerScore() > game.getPlayerScore()) {
             resultMessage = "Dealer wins!";
-        } else if (game.getDealerScore() == game.getPlayerScore()) {
-            resultMessage = "It's a tie!";
+        } else if (game.getPlayerScore() == 21) {
+            resultMessage = "BlackJack!";
+            updateBalance(true);
         } else {
             resultMessage = "You win!";
+            updateBalance(true); // Player wins
         }
 
         JOptionPane.showMessageDialog(null, resultMessage);
+        balanceLabel.setText("Balance: $" + dbManager.getUserBalance(username)); // Update the balance label
+    }
+
+    private void displayDealerCards() {
+        dealerCardPanel.removeAll();
+        List<Card> dealerHand = game.getDealerHand();
+        for (int i = 0; i < dealerHand.size(); i++) {
+            displayDealerCard(dealerHand.get(i).getIndex());
+        }
+    }
+
+    private void updateBalance(boolean playerWins) {
+        double betAmount = currentBet.getBetAmount();
+        double winnings = playerWins ? betAmount * 2 : betAmount;
+        try {
+            dbManager.updateUserBalance(username, winnings);
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error updating balance: " + e.getMessage());
+        }
+    }
+    
+    private void tie(boolean tieGame) {
+        double betAmount = currentBet.getBetAmount();
+        double winnings = tieGame ? betAmount : betAmount;
+        try {
+            dbManager.updateUserBalance(username, winnings);
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error updating balance: " + e.getMessage());
+        }
     }
 
     private void updateScores() {
@@ -243,7 +356,7 @@ public class BlackJackGUI extends JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new BlackJackGUI().setVisible(true);
+                new BlackJackGUI("player1").setVisible(true);
             }
         });
     }

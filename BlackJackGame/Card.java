@@ -28,6 +28,7 @@ public class Card
             return value;
         }
 
+        // Based on the index we return the card value so that the card jpgs can be numbered and still have an associated value
         public static CardValue fromIndex(int index) 
         {
             if (index >= 0 && index <= 3) return TWO;

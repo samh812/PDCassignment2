@@ -45,7 +45,7 @@ public class BlackJackGUI extends JFrame {
         setLayout(new BorderLayout());
 
         // Create the background panel
-        backgroundPanel = new BackgroundPanel("./resources/cards/table.jpg"); // Update with your background image path
+        backgroundPanel = new BackgroundPanel("./resources/cards/table.jpg"); // Update with your background image path, this line of code created by ChatGPT
         backgroundPanel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
 

@@ -1,14 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package BlackJackGame;
-
-/**
- *
- * @author samh
- */
-
 
 import javax.swing.*;
 import java.awt.*;
@@ -99,26 +89,17 @@ public class LoginGUI extends JFrame {
 
         add(backgroundPanel, BorderLayout.CENTER);
 
-        loginButton.addActionListener(new ActionListener() {
+ loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String username = usernameField.getText();
                 String password = new String(passwordField.getPassword());
 
-                if (username.isEmpty() || password.isEmpty()) {
-                    messageLabel.setForeground(Color.RED);
-                    messageLabel.setText("Username and password fields cannot be empty.");
+                if (dbManager.checkCredentials(username, password)) {
+                    dispose();
+                    new BlackJackGUI(username).setVisible(true);
                 } else {
-                    if (dbManager.checkCredentials(username, password)) {
-                        messageLabel.setForeground(Color.WHITE);
-                        messageLabel.setText("Login successful");
-                        new BlackJackGUI().setVisible(true);
-                        dispose();
-                    } else {
-                        messageLabel.setForeground(Color.RED); // Set color to red for failure
-                        messageLabel.setText("Invalid credentials");
-                        passwordField.setText(""); // Clear password
-                    }
+                    JOptionPane.showMessageDialog(null, "Invalid login credentials");
                 }
             }
         });

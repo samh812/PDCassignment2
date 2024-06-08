@@ -28,6 +28,7 @@ public class BlackJackGUI extends JFrame {
     private Betting currentBet;
     private JButton quitButton;
     private JButton logoutButton;
+    double balance;
 
     public BlackJackGUI(String username) {
         // Set the username
@@ -155,15 +156,16 @@ public class BlackJackGUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 try {
                     double betAmount = Double.parseDouble(betAmountField.getText());
-                    double balance = dbManager.getUserBalance(username);
+                    balance = dbManager.getUserBalance(username);
 
                     // Reset balance to $100 if it is 0
                     if (balance == 0) {
                         dbManager.updateUserBalance(username, 100);
                         balance = 100;
+                        balanceLabel.setText("Balance: $" + dbManager.getUserBalance(username));
                     }
 
-                    if (betAmount <= balance)
+                    if (betAmount <= balance && betAmount >= 0)
                     {
                         currentBet = new Betting(username, betAmount);
                         dbManager.placeBet(currentBet);
@@ -175,7 +177,13 @@ public class BlackJackGUI extends JFrame {
                         standButton.setEnabled(true);
                         displayInitialCards();
                         updateScores();
-                    } else {
+                    } 
+                    else if(betAmount < 0) 
+                    {
+                        JOptionPane.showMessageDialog(null, "Cannot Bet Less Than Zero!");
+                    }
+                    else
+                    {
                         JOptionPane.showMessageDialog(null, "Insufficient balance.");
                     }
                 } catch (NumberFormatException ex) {
@@ -209,8 +217,17 @@ public class BlackJackGUI extends JFrame {
                 standButton.setEnabled(false); // Disable stand button for new game
                 placeBetButton.setEnabled(true);
                 betAmountField.setEnabled(true);
+                
+                balance = dbManager.getUserBalance(username);
+               
                 playerScoreLabel.setText("Player Score: 0");
                 dealerScoreLabel.setText("Dealer Score: 0");
+                       
+                if (balance == 0)
+                {
+                    balanceLabel.setText("Balance: $100.0");
+                }
+               
             }
         });
         
@@ -226,7 +243,7 @@ public class BlackJackGUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dispose();
-                new LoginGUI().setVisible(true);
+                new WelcomeGUI().setVisible(true);
             }
         });
     }
